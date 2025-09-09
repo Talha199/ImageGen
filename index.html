@@ -1,408 +1,121 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster Generator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vollkorn:wght@700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827;
-            color: #f3f4f6;
-        }
-        .vollkorn-font {
-            font-family: 'Vollkorn', serif;
-        }
-        canvas {
-            background-color: #f5f3ef;
-            border-radius: 0.5rem;
-            max-width: 100%;
-            height: auto;
-        }
-        .control-panel label {
-            color: #9ca3af;
-        }
-        .control-panel input, .control-panel select {
-            background-color: #374151;
-            border-color: #4b5563;
-            color: #f3f4f6;
-            border-radius: 0.375rem;
-        }
-        .control-panel input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 8px;
-            background: #4b5563;
-            outline: none;
-            opacity: 0.7;
-            transition: opacity .2s;
-        }
-        .control-panel input[type="range"]:hover {
-            opacity: 1;
-        }
-        .control-panel input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #4f46e5;
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        .control-panel input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background: #4f46e5;
-            cursor: pointer;
-            border-radius: 50%;
-        }
-        .btn-secondary {
-            background-color: #16a34a;
-            transition: background-color 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background-color: #15803d;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Chemie Flashcards</title>
+<style>
+  body {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    height: 100vh; margin: 0;
+    font-family: sans-serif; background: #f4f7fa;
+  }
+  .card-scene {
+    width: 320px; height: 200px;
+    perspective: 1000px; margin-bottom: 20px;
+  }
+  .flashcard {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    cursor: pointer;
+  }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .card-face {
+    position: absolute; width: 100%; height: 70%;
+    border-radius: 12px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.6em; font-weight: bold;
+    backface-visibility: hidden;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    padding: 20px; text-align: center;
+  }
+  .front { background: #cce5ff; color: #003366; }
+  .back  { background: #ffe5cc; color: #663300; transform: rotateY(180deg); }
+  .controls { display: flex; gap: 12px; }
+  button {
+    padding: 10px 20px; border: none; border-radius: 8px;
+    cursor: pointer; font-size: 1em; font-weight: bold;
+    transition: background 0.2s;
+  }
+  button:hover { opacity: 0.9; }
+  .prev, .next { background: #005a9c; color: white; }
+  .flip { background: #e67e22; color: white; }
+</style>
 </head>
-<body class="flex flex-col items-center justify-center min-h-screen p-4">
+<body>
 
-    <div class="w-full max-w-6xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white">Poster Generator</h1>
-            <p class="text-lg text-gray-400 mt-2">Erstelle dein persönliches Poster!</p>
-        </header>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Kontrol Paneli -->
-            <div class="lg:col-span-1 bg-gray-900 p-6 rounded-lg shadow-lg control-panel overflow-y-auto max-h-[80vh]">
-                <h2 class="text-2xl font-bold mb-6 text-white border-b border-gray-700 pb-2">Einstellungen</h2>
-                <div class="space-y-4">
-                    <!-- Text Inputs -->
-                    <h3 class="font-bold text-lg text-white pt-2">Texte</h3>
-                    <div>
-                        <label for="preTopText" class="block text-sm font-medium mb-1">Oberer Text</label>
-                        <input type="text" id="preTopText" value="elo" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label for="topText" class="block text-sm font-medium mb-1">Haupttext</label>
-                        <input type="text" id="topText" value="ABI" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                    <div>
-                        <label for="bottomText" class="block text-sm font-medium mb-1">Unterer Text</label>
-                        <input type="text" id="bottomText" value="2028" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
+<div class="card-scene">
+  <div class="flashcard" id="flashcard">
+    <div class="card-face front" id="front"></div>
+    <div class="card-face back" id="back"></div>
+  </div>
+</div>
 
-                    <!-- Font Size Controls -->
-                    <h3 class="font-bold text-lg text-white pt-4">Schriftgrößen</h3>
-                     <div>
-                        <label for="preTopFontSize" class="block text-sm font-medium mb-1">Oberer Text: <span id="preTopFontSizeValue">75</span>px</label>
-                        <input type="range" id="preTopFontSize" min="20" max="150" value="75" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                    </div>
-                     <div>
-                        <label for="topFontSize" class="block text-sm font-medium mb-1">Haupttext: <span id="topFontSizeValue">150</span>px</label>
-                        <input type="range" id="topFontSize" min="50" max="250" value="150" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                    </div>
-                    <div>
-                        <label for="bottomFontSize" class="block text-sm font-medium mb-1">Unterer Text: <span id="bottomFontSizeValue">150</span>px</label>
-                        <input type="range" id="bottomFontSize" min="50" max="250" value="150" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
-                    </div>
+<div class="controls">
+  <button class="prev" id="prev">← Zurück</button>
+  <button class="flip" id="flip">Umdrehen</button>
+  <button class="next" id="next">Weiter →</button>
+</div>
 
-                    <!-- Layout and Style -->
-                    <h3 class="font-bold text-lg text-white pt-4">Stil & Layout</h3>
-                     <div>
-                        <label for="textLayout" class="block text-sm font-medium mb-1">Text-Layout</label>
-                        <select id="textLayout" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="center">Zentriert</option>
-                            <option value="random">Zufällig</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="colorPalette" class="block text-sm font-medium mb-1">Farbpalette</label>
-                        <select id="colorPalette" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="original">Original Warm</option>
-                            <option value="sunset">Sonnenuntergang</option>
-                            <option value="ocean">Ozeanbrise</option>
-                            <option value="pastel">Pastelltraum</option>
-                            <option value="neon">Neon Nacht</option>
-                            <option value="forest">Waldgrün</option>
-                            <option value="royal">Königlich</option>
-                            <option value="monochrome">Monochrom</option>
-                            <option value="vintage">Vintage</option>
-                            <option value="candy">Süßigkeiten</option>
-                            <option value="galaxy">Galaxie</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="decoration" class="block text-sm font-medium mb-1">Dekoration</label>
-                        <select id="decoration" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="none">Keine</option>
-                            <option value="confetti">Konfetti</option>
-                            <option value="stars">Sterne</option>
-                            <option value="bubbles">Blasen</option>
-                            <option value="lines">Linien</option>
-                            <option value="geometric">Geometrisch</option>
-                            <option value="floral">Blumen</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="icon" class="block text-sm font-medium mb-1">Icon</label>
-                        <select id="icon" class="w-full p-2 border focus:ring-indigo-500 focus:border-indigo-500">
-                            <option value="none">Keins</option>
-                            <option value="cap">Absolventenhut</option>
-                            <option value="star">Stern</option>
-                            <option value="book">Buch</option>
-                            <option value="laurel">Lorbeerkranz</option>
-                        </select>
-                    </div>
-                    <div class="pt-4">
-                        <button id="downloadBtn" class="w-full text-white font-bold py-2 px-4 rounded-lg btn-secondary">
-                            Herunterladen
-                        </button>
-                    </div>
-                </div>
-            </div>
+<script>
+const cards = [
+  { formula: 'H₃PO₄', name: 'Phosphorsäure' },
+  { formula: 'H₂PO₄⁻', name: 'Dihydrogenphosphat-Ion' },
+  { formula: 'HPO₄²⁻', name: 'Hydrogenphosphat-Ion' },
+  { formula: 'PO₄³⁻', name: 'Phosphat-Ion' },
+  { formula: 'H₂SO₄', name: 'Schwefelsäure' },
+  { formula: 'HSO₄⁻', name: 'Hydrogensulfat-Ion' },
+  { formula: 'SO₄²⁻', name: 'Sulfat-Ion' },
+  { formula: 'H₂CO₃', name: 'Kohlensäure' },
+  { formula: 'HCO₃⁻', name: 'Hydrogencarbonat-Ion' },
+  { formula: 'CO₃²⁻', name: 'Carbonat-Ion' },
+  { formula: 'H₂S', name: 'Schwefelwasserstoff' },
+  { formula: 'HS⁻', name: 'Hydrogensulfid-Ion' },
+  { formula: 'S²⁻', name: 'Sulfid-Ion' },
+  { formula: 'H₃O⁺', name: 'Hydronium-Ion' },
+  { formula: 'H₂O', name: 'Wasser' },
+  { formula: 'OH⁻', name: 'Hydroxid-Ion' },
+  { formula: 'HCl', name: 'Salzsäure' },
+  { formula: 'Cl⁻', name: 'Chlorid-Ion' },
+  { formula: 'HNO₃', name: 'Salpetersäure' },
+  { formula: 'NO₃⁻', name: 'Nitrat-Ion' },
+  { formula: 'NH₄⁺', name: 'Ammonium-Ion' },
+  { formula: 'NH₃', name: 'Ammoniak' },
+  { formula: 'HClO₂', name: 'Chlorige Säure' },
+  { formula: 'ClO₂⁻', name: 'Chlorit-Ion' },
+  { formula: 'NaOH', name: 'Natriumhydroxid' },
+  { formula: 'Ca(OH)₂', name: 'Calciumhydroxid' }
+];
 
-            <!-- Canvas Alanı -->
-            <div class="lg:col-span-2 flex items-center justify-center bg-gray-900 p-4 rounded-lg shadow-lg">
-                <canvas id="posterCanvas" width="800" height="600"></canvas>
-            </div>
-        </div>
-    </div>
+let current = 0;
+const flashcard = document.getElementById('flashcard');
+const front = document.getElementById('front');
+const back = document.getElementById('back');
 
-    <script>
-        const canvas = document.getElementById('posterCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Input elements
-        const preTopTextInput = document.getElementById('preTopText');
-        const topTextInput = document.getElementById('topText');
-        const bottomTextInput = document.getElementById('bottomText');
-        
-        const preTopFontSizeSlider = document.getElementById('preTopFontSize');
-        const topFontSizeSlider = document.getElementById('topFontSize');
-        const bottomFontSizeSlider = document.getElementById('bottomFontSize');
+function updateCard() {
+  front.textContent = cards[current].formula;
+  back.textContent = cards[current].name;
+  flashcard.classList.remove('flipped');
+}
 
-        const preTopFontSizeValue = document.getElementById('preTopFontSizeValue');
-        const topFontSizeValue = document.getElementById('topFontSizeValue');
-        const bottomFontSizeValue = document.getElementById('bottomFontSizeValue');
+document.getElementById('flip').addEventListener('click', () => {
+  flashcard.classList.toggle('flipped');
+});
+document.getElementById('next').addEventListener('click', () => {
+  current = (current + 1) % cards.length;
+  updateCard();
+});
+document.getElementById('prev').addEventListener('click', () => {
+  current = (current - 1 + cards.length) % cards.length;
+  updateCard();
+});
+flashcard.addEventListener('click', () => {
+  flashcard.classList.toggle('flipped');
+});
 
-        const textLayoutSelect = document.getElementById('textLayout');
-        const colorPaletteSelect = document.getElementById('colorPalette');
-        const decorationSelect = document.getElementById('decoration');
-        const iconSelect = document.getElementById('icon');
-        const downloadBtn = document.getElementById('downloadBtn');
-
-        const palettes = {
-            original: { colors: ['#f8b400', '#ff6f61', '#a4508b', '#3b5998'], text: ['#003366', '#d63447'] },
-            sunset: { colors: ['#F9C1B1', '#F4A261', '#E76F51', '#2A9D8F'], text: ['#264653', '#E9C46A'] },
-            ocean: { colors: ['#00A8E8', '#007EA7', '#94d2bd', '#003459'], text: ['#ffffff', '#001219'] },
-            pastel: { colors: ['#A8E6CF', '#DCEDC1', '#FFD3B6', '#FFAAA5'], text: ['#5d5c61', '#7395ae'] },
-            neon: { colors: ['#08f7fe', '#09fbd3', '#fe53bb', '#f5d300'], text: ['#ffffff', '#ffffff'] },
-            forest: { colors: ['#588157', '#3A5A40', '#344E41', '#A3B18A'], text: ['#DAD7CD', '#FFFFFF'] },
-            royal: { colors: ['#4C1D95', '#5B21B6', '#C084FC', '#F5D0FE'], text: ['#FDE74C', '#FFFFFF'] },
-            monochrome: { colors: ['#E5E5E5', '#CCCCCC', '#B2B2B2', '#999999'], text: ['#000000', '#2d2d2d'] },
-            vintage: { colors: ['#DABFDE', '#C197D2', '#AC7FBA', '#8F5E99'], text: ['#4A404F', '#FFFFFF'] },
-            candy: { colors: ['#FFC3E1', '#FFB7B2', '#FFDAC1', '#E2F0CB'], text: ['#A28089', '#6D5D6E'] },
-            galaxy: { colors: ['#231942', '#5E548E', '#9F86C0', '#BE95C4'], text: ['#E0B1CB', '#FFFFFF'] }
-        };
-
-        function drawBackground(palette) {
-            const gradient = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, Math.max(canvas.width, canvas.height));
-            const shuffledColors = [...palette.colors].sort(() => 0.5 - Math.random());
-            gradient.addColorStop(0, shuffledColors[0]);
-            gradient.addColorStop(0.25, shuffledColors[1]);
-            gradient.addColorStop(0.5, shuffledColors[2]);
-            gradient.addColorStop(1, shuffledColors[3]);
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function addGrain(amount = 30) {
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-            for (let i = 0; i < pixels.length; i += 4) {
-                const grain = Math.random() * amount - (amount / 2);
-                pixels[i] = Math.max(0, Math.min(255, pixels[i] + grain));
-                pixels[i + 1] = Math.max(0, Math.min(255, pixels[i + 1] + grain));
-                pixels[i + 2] = Math.max(0, Math.min(255, pixels[i + 2] + grain));
-            }
-            ctx.putImageData(imageData, 0, 0);
-        }
-        
-        function drawText(palette) {
-            const layout = textLayoutSelect.value;
-            const rand = (max) => (layout === 'random' ? (Math.random() - 0.5) * max : 0);
-
-            const preTopText = preTopTextInput.value;
-            const topText = topTextInput.value;
-            const bottomText = bottomTextInput.value;
-            
-            const preTopSize = parseInt(preTopFontSizeSlider.value);
-            const topSize = parseInt(topFontSizeSlider.value);
-            const bottomSize = parseInt(bottomFontSizeSlider.value);
-
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            const totalHeight = preTopSize + topSize + bottomSize;
-            const y_base = canvas.height / 2 - totalHeight / 2;
-
-            // Oberer Text
-            ctx.font = `bold ${preTopSize}px 'Vollkorn', serif`;
-            ctx.fillStyle = palette.text[0];
-            ctx.fillText(preTopText, canvas.width / 2 + rand(20), y_base + preTopSize/2 + rand(15));
-
-            // Haupttext
-            ctx.font = `bold ${topSize}px 'Vollkorn', serif`;
-            ctx.fillStyle = palette.text[0];
-            ctx.fillText(topText, canvas.width / 2 + rand(20), y_base + preTopSize + topSize/2 + rand(15));
-            
-            // Unterer Text
-            ctx.font = `bold ${bottomSize}px 'Vollkorn', serif`;
-            ctx.fillStyle = palette.text[1];
-            ctx.fillText(bottomText, canvas.width / 2 + rand(20), y_base + preTopSize + topSize + bottomSize/2 + rand(15));
-        }
-        
-        function drawDecorations() {
-            const type = decorationSelect.value;
-            if (type === 'none') return;
-
-            for (let i = 0; i < 60; i++) {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height;
-                const radius = Math.random() * 10 + 2;
-                const alpha = Math.random() * 0.5 + 0.2;
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-                ctx.lineWidth = 2;
-
-                ctx.beginPath();
-                if (['confetti', 'bubbles'].includes(type)) {
-                    ctx.arc(x, y, radius, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (type === 'stars') {
-                    drawStarShape(x, y, 5, radius, radius / 2);
-                    ctx.fill();
-                } else if (type === 'lines') {
-                    ctx.moveTo(x - radius, y - radius);
-                    ctx.lineTo(x + radius, y + radius);
-                    ctx.stroke();
-                } else if (type === 'geometric') {
-                    const side = Math.random() * 20 + 5;
-                    if (Math.random() > 0.5) { // Square
-                         ctx.rect(x - side/2, y - side/2, side, side);
-                    } else { // Triangle
-                        ctx.moveTo(x, y - side/2);
-                        ctx.lineTo(x + side/2, y + side/2);
-                        ctx.lineTo(x - side/2, y + side/2);
-                        ctx.closePath();
-                    }
-                    ctx.fill();
-                } else if (type === 'floral') {
-                     for (let j = 0; j < 5; j++) {
-                        ctx.beginPath();
-                        ctx.ellipse(x, y, radius, radius/2, Math.PI / 5 * j * 2, 0, Math.PI*2);
-                        ctx.fill();
-                    }
-                }
-            }
-        }
-        
-        function drawIcon() {
-            const icon = iconSelect.value;
-            if (icon === 'none') return;
-
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 4;
-            
-            const x = canvas.width / 2;
-            const y = 120;
-            const size = 120;
-            
-            if (icon === 'cap') {
-                ctx.beginPath();
-                ctx.moveTo(x - size, y); ctx.lineTo(x, y - size/2.5); ctx.lineTo(x + size, y); ctx.lineTo(x, y + size/2.5); ctx.closePath();
-                ctx.fill(); ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x - size/2, y + size/3); ctx.quadraticCurveTo(x, y + size/3 + 40, x + size/2, y + size/3);
-                ctx.fill(); ctx.stroke();
-            } else if (icon === 'star') {
-                ctx.beginPath();
-                drawStarShape(x, y, 5, size/2, size/4);
-                ctx.fill(); ctx.stroke();
-            } else if (icon === 'book') {
-                ctx.beginPath();
-                ctx.rect(x - size/2, y - size/3, size, size/1.5);
-                ctx.fill(); ctx.stroke();
-                ctx.beginPath();
-                ctx.moveTo(x, y - size/3); ctx.lineTo(x, y + size/3);
-                ctx.stroke();
-            } else if (icon === 'laurel') {
-                ctx.lineWidth = 8;
-                ctx.beginPath();
-                ctx.arc(x, y + 20, size/2, Math.PI * 1.1, Math.PI * 1.9);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(x, y + 20, size/2, Math.PI * 0.1, Math.PI * 0.9, true);
-                ctx.stroke();
-            }
-        }
-        
-        function drawStarShape(cx, cy, spikes, outerRadius, innerRadius) {
-            let rot = Math.PI / 2 * 3;
-            let x = cx;
-            let y = cy;
-            let step = Math.PI / spikes;
-
-            ctx.moveTo(cx, cy - outerRadius);
-            for (let i = 0; i < spikes; i++) {
-                x = cx + Math.cos(rot) * outerRadius; y = cy + Math.sin(rot) * outerRadius; ctx.lineTo(x, y); rot += step;
-                x = cx + Math.cos(rot) * innerRadius; y = cy + Math.sin(rot) * innerRadius; ctx.lineTo(x, y); rot += step;
-            }
-            ctx.lineTo(cx, cy - outerRadius);
-            ctx.closePath();
-        }
-
-        function generateImage() {
-            ctx.fillStyle = '#f5f3ef';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            const selectedPalette = palettes[colorPaletteSelect.value];
-            
-            drawBackground(selectedPalette);
-            addGrain();
-            drawDecorations();
-            drawIcon();
-            drawText(selectedPalette);
-        }
-        
-        const controls = document.querySelectorAll('.control-panel input, .control-panel select');
-        controls.forEach(control => {
-            const eventType = control.tagName.toLowerCase() === 'select' ? 'change' : 'input';
-            control.addEventListener(eventType, generateImage);
-        });
-
-        // Update slider value displays
-        preTopFontSizeSlider.addEventListener('input', () => { preTopFontSizeValue.textContent = preTopFontSizeSlider.value; });
-        topFontSizeSlider.addEventListener('input', () => { topFontSizeValue.textContent = topFontSizeSlider.value; });
-        bottomFontSizeSlider.addEventListener('input', () => { bottomFontSizeValue.textContent = bottomFontSizeSlider.value; });
-        
-        downloadBtn.addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = `poster_${topTextInput.value}_${bottomTextInput.value}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
-
-        window.onload = generateImage;
-    </script>
+updateCard();
+</script>
 </body>
 </html>
-
