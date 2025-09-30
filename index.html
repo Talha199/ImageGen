@@ -3,498 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interaktive Grammatik-Übungen</title>
+    <title>Mathe-Aussagen: Wahr oder Falsch? (40 Fragen)</title>
     <style>
-        /* Globale Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        /* Grundlegende Stile für die Seite */
         body {
-            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-        }
-        
-        h2 {
+            background-color: #f4f7f9;
             color: #333;
-            margin: 30px 0 20px 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #007bff;
-        }
-        
-        /* Flashcard Styles */
-        .flashcard-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        
-        .flashcard {
-            perspective: 1000px;
-            height: 150px;
-            cursor: pointer;
-        }
-        
-        .flashcard-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-        
-        .flashcard.flipped .flashcard-inner {
-            transform: rotateY(180deg);
-        }
-        
-        .flashcard-front, .flashcard-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            margin: 0;
             padding: 20px;
+        }
+
+        /* Container für den gesamten Inhalt */
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #ffffff;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
-        
-        .flashcard-front {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+        /* Kopfzeile */
+        .header {
+            background-color: #34495e;
             color: white;
-            font-weight: bold;
-            font-size: 1.2em;
-        }
-        
-        .flashcard-back {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            transform: rotateY(180deg);
-            font-size: 0.95em;
-            line-height: 1.5;
-        }
-        
-        /* Übung Styles */
-        .exercise-container {
-            background-color: #f8f9fa;
             padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 30px;
+            text-align: center;
         }
         
-        .sentence-parts {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin: 20px 0;
-            align-items: flex-end;
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
         }
-        
-        .sentence-part, .word-unit {
+
+        /* Stile für die Akkordeon-Knöpfe (Fragen) */
+        .accordion {
+            background-color: #fff;
+            color: #2c3e50;
+            cursor: pointer;
+            padding: 18px 25px;
+            width: 100%;
+            border: none;
+            border-top: 1px solid #e8e8e8;
+            text-align: left;
+            outline: none;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
         }
         
-        .sentence-text, .word-text {
-            padding: 10px 15px;
-            background-color: white;
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+        .accordion:first-of-type {
+            border-top: none;
+        }
+
+        .accordion:hover, .accordion.active {
+            background-color: #ecf0f1;
         }
         
-        select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: white;
-            cursor: pointer;
-            font-size: 0.95em;
-            min-width: 150px;
-        }
-        
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1em;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.3s;
-        }
-        
-        button:hover {
-            background-color: #0056b3;
-        }
-        
-        .correct {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .incorrect {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        
-        .feedback {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        .feedback.show {
-            display: block;
-        }
-        
-        .feedback.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .feedback.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .score {
+        /* Plus/Minus-Symbol */
+        .accordion::after {
+            content: '+';
+            font-size: 1.5em;
+            color: #3498db;
             font-weight: bold;
-            margin-top: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .accordion.active::after {
+            content: '−';
+            transform: rotate(180deg);
+        }
+
+        /* Stile für die ausklappbaren Antworten */
+        .panel {
+            padding: 0 25px;
+            background-color: #fafafa;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .panel p {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Hervorhebungen für die Antworten */
+        .answer-true {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .answer-false {
+            color: #c0392b;
+            font-weight: bold;
+        }
+        
+        /* NEU: Stile für mathematische Formeln */
+        .math {
+            font-family: "Cambria Math", "Times New Roman", serif;
+            font-weight: 600; /* Dicker als normaler Text */
+            color: #2980b9;
         }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1>Interaktive Grammatik-Übungen</h1>
+        <div class="header">
+            <h1>Mathe-Aussagen: Wahr oder Falsch?</h1>
+        </div>
+
+        <button class="accordion">Die Ableitung von <span class="math">f(x) = (3x + 2)(x² − 1)</span> kann mit Produktregel oder Ausmultiplizieren berechnet werden.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Beide Wege sind legitim und führen zum selben Ergebnis.</p></div>
+
+        <button class="accordion">Bei der Kettenregel gilt: Wenn <span class="math">h(x) = f(g(x))</span>, dann ist <span class="math">h'(x) = f'(x) ⋅ g'(x)</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Die korrekte Regel ist <span class="math">h'(x) = f'(g(x)) ⋅ g'(x)</span>.</p></div>
         
-        <!-- Abschnitt 1: Flashcards - Wortarten -->
-        <section>
-            <h2>Teil 1: Wortarten erkennen (Flashcards)</h2>
-            <div class="flashcard-container" id="wortarten-flashcards">
-                <!-- Flashcards werden hier durch JavaScript eingefügt -->
-            </div>
-        </section>
+        <button class="accordion">Die Funktion <span class="math">f(x) = e<sup>2x+1</sup></span> hat die Ableitung <span class="math">f'(x) = 2e<sup>2x+1</sup></span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Dies ist eine korrekte Anwendung der Kettenregel.</p></div>
         
-        <!-- Abschnitt 2: Flashcards - Satzglieder -->
-        <section>
-            <h2>Teil 2: Satzglieder verstehen (Flashcards)</h2>
-            <div class="flashcard-container" id="satzglieder-flashcards">
-                <!-- Flashcards werden hier durch JavaScript eingefügt -->
-            </div>
-        </section>
+        <button class="accordion">Wenn <span class="math">f(x) = sin(x²)</span>, dann ist <span class="math">f'(x) = cos(x²)</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Die innere Ableitung fehlt. Richtig ist: <span class="math">f'(x) = cos(x²) ⋅ 2x</span>.</p></div>
+
+        <button class="accordion">Die Produktregel besagt: <span class="math">(u ⋅ v)' = u' ⋅ v'</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Die korrekte Produktregel lautet: <span class="math">(u ⋅ v)' = u'⋅v + u⋅v'</span>.</p></div>
         
-        <!-- Abschnitt 3: Satzglieder bestimmen -->
-        <section>
-            <h2>Teil 3: Übung zur Satzgliedbestimmung</h2>
-            <div class="exercise-container">
-                <p><strong>Bestimme die Satzglieder in den folgenden Sätzen:</strong></p>
-                <div id="satzglieder-exercise">
-                    <!-- Übungen werden durch JavaScript eingefügt -->
-                </div>
-                <button onclick="checkSatzglieder()">Antworten prüfen</button>
-                <div id="satzglieder-feedback" class="feedback"></div>
-            </div>
-        </section>
+        <button class="accordion">Bei der linearen Kettenregel für <span class="math">f(ax + b)</span> multipliziert man die normale Ableitung mit dem Faktor <span class="math">a</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Dies ist die korrekte Anwendung der Kettenregel auf eine lineare innere Funktion.</p></div>
+
+        <button class="accordion">Die Ableitung von <span class="math">f(x) = 5<sup>x</sup></span> ist <span class="math">f'(x) = x ⋅ 5<sup>x−1</sup></span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Richtig ist: <span class="math">f'(x) = 5<sup>x</sup> ⋅ ln(5)</span>.</p></div>
         
-        <!-- Abschnitt 4: Wortarten zuordnen -->
-        <section>
-            <h2>Teil 4: Übung zur Wortartzuordnung</h2>
-            <div class="exercise-container">
-                <p><strong>Ordne jedem Wort die richtige Wortart zu:</strong></p>
-                <div id="wortarten-exercise">
-                    <!-- Übung wird durch JavaScript eingefügt -->
-                </div>
-                <button onclick="checkWortarten()">Antworten prüfen</button>
-                <div id="wortarten-feedback" class="feedback"></div>
-            </div>
-        </section>
+        <button class="accordion">Wenn eine Funktion bei <span class="math">x₀</span> eine Nullstelle hat, dann gilt <span class="math">f'(x₀) = 0</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Eine Nullstelle bedeutet <span class="math">f(x₀) = 0</span>. Eine Ableitung von null kennzeichnet eine horizontale Tangente.</p></div>
+
+        <button class="accordion">Die Quotientenregel lautet: <span class="math">(u/v)' = (u'⋅v + u⋅v') / v²</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Im Zähler muss ein Minuszeichen stehen: <span class="math">(u'⋅v − u⋅v') / v²</span>.</p></div>
+        
+        <button class="accordion">Bei der Substitutionsmethode ersetzt man immer <span class="math">dx</span> durch <span class="math">du/u'</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Wenn <span class="math">u = g(x)</span>, ersetzt man <span class="math">dx</span> durch <span class="math">du / g'(x)</span>.</p></div>
+        
+        <button class="accordion">Ein Wendepunkt liegt vor, wenn <span class="math">f''(x) = 0</span> und <span class="math">f'''(x) ≠ 0</span> gilt.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Dies ist ein hinreichendes Kriterium für einen Wendepunkt.</p></div>
+
+        <button class="accordion">Die Funktion <span class="math">f(x) = x³ − 3x</span> hat genau zwei Extremstellen.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Die Ableitung <span class="math">f'(x) = 3x² − 3</span> hat bei <span class="math">x = ±1</span> Nullstellen.</p></div>
+        
+        <button class="accordion">Wenn <span class="math">f'(x) &gt; 0</span> in einem Intervall, ist <span class="math">f</span> dort streng monoton fallend.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Eine positive erste Ableitung bedeutet, dass die Funktion streng monoton <strong>steigend</strong> ist.</p></div>
+
+        <button class="accordion">Das Integral <span class="math">∫e<sup>3x</sup> dx = (1/3)⋅e<sup>3x</sup> + C</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+
+        <button class="accordion">Bei der partiellen Integration gilt: <span class="math">∫u⋅v' dx = u⋅v + ∫u'⋅v dx</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Das zweite Integral muss subtrahiert werden: <span class="math">∫u⋅v' dx = u⋅v − ∫u'⋅v dx</span>.</p></div>
+
+        <button class="accordion">Die Ableitung von <span class="math">ln(x²)</span> ist <span class="math">1/x²</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Nach der Kettenregel ist die Ableitung <span class="math">(1/x²) ⋅ 2x = 2/x</span>.</p></div>
+        
+        <button class="accordion">Wenn <span class="math">f(x) = cos(ax + b)</span>, dann ist <span class="math">f'(x) = −a⋅sin(ax + b)</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+
+        <button class="accordion">Ein lokales Maximum liegt vor, wenn <span class="math">f'(x) = 0</span> und <span class="math">f''(x) &lt; 0</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+        
+        <button class="accordion">Die Funktion <span class="math">f(x) = e<sup>x</sup></span> ist ihre eigene Stammfunktion.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Sie ist ihre eigene <strong>Ableitung</strong>. Eine Stammfunktion ist <span class="math">∫e<sup>x</sup> dx = e<sup>x</sup> + C</span>.</p></div>
+
+        <button class="accordion">Bei der Kettenregel für <span class="math">f(g(h(x)))</span> multipliziert man alle drei Ableitungen miteinander.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Die Ableitung ist <span class="math">f'(g(h(x))) ⋅ g'(h(x)) ⋅ h'(x)</span>.</p></div>
+
+        <button class="accordion">Das Integral <span class="math">∫sin(2x) dx = −cos(2x)/2 + C</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+
+        <button class="accordion">Eine Funktion kann an einer Stelle differenzierbar sein, ohne dort stetig zu sein.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Differenzierbarkeit impliziert immer Stetigkeit.</p></div>
+
+        <button class="accordion">Die Ableitung von <span class="math">f(x) = √(x² + 1)</span> ist <span class="math">f'(x) = x/√(x² + 1)</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+
+        <button class="accordion">Wenn <span class="math">f''(x) = 0</span> für alle <span class="math">x</span>, dann ist <span class="math">f</span> eine lineare Funktion.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Zweimaliges Integrieren von 0 ergibt eine Funktion der Form <span class="math">f(x) = ax + b</span>.</p></div>
+        
+        <button class="accordion">Das Produkt zweier differenzierbarer Funktionen ist immer differenzierbar.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Die Existenz der Produktregel beweist dies.</p></div>
+        
+        <button class="accordion">Die Umkehrformel zur Kettenregel lautet: <span class="math">∫f'(g(x))⋅g'(x) dx = f(g(x)) + C</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Dies ist die Regel der Integration durch Substitution.</p></div>
+
+        <button class="accordion">Ein Sattelpunkt liegt vor, wenn <span class="math">f'(x) = 0</span> und <span class="math">f''(x) = 0</span>, aber kein Extremum vorliegt.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Dies ist die Definition eines Sattelpunktes.</p></div>
+
+        <button class="accordion">Die Ableitung von <span class="math">arcsin(x)</span> ist <span class="math">1/√(1 + x²)</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Die korrekte Ableitung ist <span class="math">1/√(1 − x²)</span>.</p></div>
+
+        <button class="accordion">Wenn eine Funktion zweimal differenzierbar ist, dann ist sie automatisch stetig.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span> Da schon die erste Differenzierbarkeit Stetigkeit voraussetzt.</p></div>
+
+        <button class="accordion">Das Integral <span class="math">∫1/x dx</span> existiert für <span class="math">x = 0</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Die Funktion <span class="math">1/x</span> hat bei <span class="math">x=0</span> eine Polstelle und ist dort nicht definiert.</p></div>
+        
+        <button class="accordion">Bei der Substitution <span class="math">u = g(x)</span> gilt: <span class="math">dx = g'(x)⋅du</span>.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Es gilt <span class="math">du = g'(x)⋅dx</span>, also <span class="math">dx = du/g'(x)</span>.</p></div>
+
+        <button class="accordion">Die Funktion <span class="math">f(x) = |x|</span> ist an der Stelle <span class="math">x = 0</span> differenzierbar.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Die Funktion hat an der Stelle <span class="math">x=0</span> einen "Knick".</p></div>
+
+        <button class="accordion">Wenn <span class="math">f(x) = a<sup>x</sup></span> mit <span class="math">a &gt; 0</span>, dann ist <span class="math">f'(x) = a<sup>x</sup> ⋅ ln(a)</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+        
+        <button class="accordion">Ein globales Minimum ist immer auch ein lokales Minimum.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Ein globales Minimum kann am Rand eines Definitionsbereichs auftreten.</p></div>
+
+        <button class="accordion">Die Regel von l'Hospital kann nur bei "0/0" angewendet werden.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Sie kann auch bei unbestimmten Formen des Typs "∞/∞" angewendet werden.</p></div>
+        
+        <button class="accordion">Die Ableitung von <span class="math">tan(x)</span> ist <span class="math">1/cos²(x)</span>.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+        
+        <button class="accordion">Wenn <span class="math">f(x)</span> eine gerade Funktion ist, dann ist <span class="math">f'(x)</span> eine ungerade Funktion.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+
+        <button class="accordion">Das Integral <span class="math">∫x⋅e<sup>x</sup> dx</span> kann nicht mit partieller Integration gelöst werden.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> Dies ist ein klassisches Beispiel für die partielle Integration.</p></div>
+        
+        <button class="accordion">Eine Funktion mit <span class="math">f'(x) = 0</span> für alle <span class="math">x</span> ist konstant.</button>
+        <div class="panel"><p><span class="answer-true">Wahr.</span></p></div>
+        
+        <button class="accordion">Die zweite Ableitung gibt die Krümmung an: <span class="math">f''(x) &gt; 0</span> bedeutet rechtsgekrümmt.</button>
+        <div class="panel"><p><span class="answer-false">Falsch.</span> <span class="math">f''(x) &gt; 0</span> bedeutet <strong>linksgekrümmt</strong> (konkav, wie ein lachender Mund).</p></div>
+
     </div>
-    
+
     <script>
-        // Daten für Wortarten-Flashcards
-        const wortartenData = [
-            { front: "Verb", back: "Tu-Wort, beschreibt eine Tätigkeit oder einen Zustand\nBeispiele: laufen, sein" },
-            { front: "Adjektiv", back: "Wiewort, beschreibt die Eigenschaft eines Nomens\nBeispiele: schön, gelb, fett" },
-            { front: "Nomen (Substantiv)", back: "Hauptwort für Lebewesen, Dinge, Begriffe\nFrage: Wer/Was?\nBeispiele: Hund, Katze" },
-            { front: "Pronomen", back: "Fürwort, steht anstelle eines Nomens" },
-            { front: "Personalpronomen", back: "ich, du, er, sie, es, wir, ihr, sie" },
-            { front: "Relativpronomen", back: "der, die, das, welcher, wer" },
-            { front: "Possessivpronomen", back: "mein, dein, unser, euer" },
-            { front: "Demonstrativpronomen", back: "dieser, dieses, jener" },
-            { front: "Reflexivpronomen", back: "mich, dich, sich, mir, dir" },
-            { front: "Interrogativpronomen", back: "wer, wessen, wem, was" },
-            { front: "Indefinitpronomen", back: "man, jemand, keiner" },
-            { front: "Präposition", back: "Verhältniswort\nBeispiele: in, auf, vor, hinter, unter, neben" },
-            { front: "Adverb", back: "Umstandswort\nBeispiele: heute, morgen, dort" },
-            { front: "Konjunktion", back: "Bindewort\nBeispiele: und, oder, weil, denn, dass, ob" },
-            { front: "Interjektion", back: "Ausrufewort\nBeispiele: Ach!, Oh!, Ui!" }
-        ];
-        
-        // Daten für Satzglieder-Flashcards
-        const satzgliederData = [
-            { front: "Subjekt", back: "Frage: Wer oder was?\nSatzgegenstand" },
-            { front: "Prädikat", back: "Die Satzaussage\nWas tut das Subjekt?" },
-            { front: "Akkusativobjekt", back: "Frage: Wen oder was?\n4. Fall" },
-            { front: "Genitivattribut", back: "Frage: Wessen?\n2. Fall" },
-            { front: "Lokaladverbial", back: "Adverbiale Bestimmung des Ortes\nFrage: Wo? Wohin? Woher?" },
-            { front: "Temporaladverbial", back: "Adverbiale Bestimmung der Zeit\nFrage: Wann? Wie lange?" },
-            { front: "Modaladverbial", back: "Adverbiale Bestimmung der Art und Weise\nFrage: Wie? Auf welche Art?" },
-            { front: "Kausaladverbial", back: "Adverbiale Bestimmung des Grundes\nFrage: Warum? Weshalb? Weswegen?" },
-            { front: "Instrumentaladverbial", back: "Adverbiale Bestimmung des Mittels\nFrage: Womit? Wodurch? Mit welchen Mitteln?" }
-        ];
-        
-        // Sätze für Satzglieder-Übung
-        const satzgliederSaetze = [
-            {
-                id: 'satz1',
-                parts: [
-                    { text: "In der Küche", solution: "Lokaladverbial" },
-                    { text: "strich ... glatt", solution: "Prädikat" },
-                    { text: "die Köchin", solution: "Subjekt" },
-                    { text: "den Teig", solution: "Akkusativobjekt" },
-                    { text: "vergnügt", solution: "Modaladverbial" },
-                    { text: "mit dem Messer", solution: "Instrumentaladverbial" }
-                ]
-            },
-            {
-                id: 'satz2',
-                parts: [
-                    { text: "Der Junge", solution: "Subjekt" },
-                    { text: "isst ... weg", solution: "Prädikat" },
-                    { text: "den Apfel", solution: "Akkusativobjekt" },
-                    { text: "seines Vaters", solution: "Genitivattribut" }
-                ]
-            },
-            {
-                id: 'satz3',
-                parts: [
-                    { text: "In diesem Jahr", solution: "Temporaladverbial" },
-                    { text: "findet ... statt", solution: "Prädikat" },
-                    { text: "eine Messe", solution: "Subjekt" },
-                    { text: "in Frankfurt", solution: "Lokaladverbial" }
-                ]
-            },
-            {
-                id: 'satz4',
-                parts: [
-                    { text: "Wegen des großen Andrangs", solution: "Kausaladverbial" },
-                    { text: "sollte ... kommen", solution: "Prädikat" },
-                    { text: "man", solution: "Subjekt" },
-                    { text: "mit dem Auto", solution: "Instrumentaladverbial" },
-                    { text: "nicht zu spät", solution: "Modaladverbial" }
-                ]
-            }
-        ];
-        
-        // Satz für Wortarten-Übung
-        const wortartenSatz = {
-            id: 'wortarten-uebung',
-            words: [
-                { text: "Das", solution: "Artikel" },
-                { text: "ist", solution: "Verb" },
-                { text: "das", solution: "Artikel" },
-                { text: "geplagte", solution: "Adjektiv" },
-                { text: "Kind,", solution: "Nomen" },
-                { text: "das", solution: "Relativpronomen" },
-                { text: "bedauerlicherweise", solution: "Adverb" },
-                { text: "vergessen", solution: "Verb" },
-                { text: "hat,", solution: "Verb" },
-                { text: "dass", solution: "Konjunktion" },
-                { text: "wir", solution: "Personalpronomen" },
-                { text: "einen", solution: "Artikel" },
-                { text: "Test", solution: "Nomen" },
-                { text: "schreiben", solution: "Verb" }
-            ]
-        };
-        
-        // Funktion zum Erstellen der Flashcards
-        function createFlashcards(data, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = '';
-            
-            data.forEach((card, index) => {
-                const flashcard = document.createElement('div');
-                flashcard.className = 'flashcard';
-                flashcard.innerHTML = `
-                    <div class="flashcard-inner">
-                        <div class="flashcard-front">${card.front}</div>
-                        <div class="flashcard-back">${card.back.replace(/\n/g, '<br>')}</div>
-                    </div>
-                `;
-                flashcard.onclick = function() {
-                    this.classList.toggle('flipped');
-                };
-                container.appendChild(flashcard);
-            });
-        }
-        
-        // Funktion zum Erstellen der Satzglieder-Übung
-        function createSatzgliederExercise() {
-            const container = document.getElementById('satzglieder-exercise');
-            container.innerHTML = '';
-            
-            satzgliederSaetze.forEach((satz, satzIndex) => {
-                const satzDiv = document.createElement('div');
-                satzDiv.innerHTML = `<p style="margin-top: 20px;"><strong>Satz ${satzIndex + 1}:</strong></p>`;
-                
-                const partsDiv = document.createElement('div');
-                partsDiv.className = 'sentence-parts';
-                
-                satz.parts.forEach((part, partIndex) => {
-                    const partDiv = document.createElement('div');
-                    partDiv.className = 'sentence-part';
-                    partDiv.innerHTML = `
-                        <div class="sentence-text">${part.text}</div>
-                        <select id="${satz.id}-part${partIndex}">
-                            <option value="">-- Wähle --</option>
-                            <option value="Subjekt">Subjekt</option>
-                            <option value="Prädikat">Prädikat</option>
-                            <option value="Akkusativobjekt">Akkusativobjekt</option>
-                            <option value="Genitivattribut">Genitivattribut</option>
-                            <option value="Lokaladverbial">Lokaladverbial</option>
-                            <option value="Temporaladverbial">Temporaladverbial</option>
-                            <option value="Modaladverbial">Modaladverbial</option>
-                            <option value="Kausaladverbial">Kausaladverbial</option>
-                            <option value="Instrumentaladverbial">Instrumentaladverbial</option>
-                        </select>
-                    `;
-                    partsDiv.appendChild(partDiv);
-                });
-                
-                satzDiv.appendChild(partsDiv);
-                container.appendChild(satzDiv);
-            });
-        }
-        
-        // Funktion zum Erstellen der Wortarten-Übung
-        function createWortartenExercise() {
-            const container = document.getElementById('wortarten-exercise');
-            container.innerHTML = '';
-            
-            const partsDiv = document.createElement('div');
-            partsDiv.className = 'sentence-parts';
-            
-            wortartenSatz.words.forEach((word, index) => {
-                const partDiv = document.createElement('div');
-                partDiv.className = 'word-unit';
-                partDiv.innerHTML = `
-                    <div class="word-text">${word.text}</div>
-                    <select id="${wortartenSatz.id}-wort${index}">
-                        <option value="">-- Wähle --</option>
-                        <option value="Artikel">Artikel</option>
-                        <option value="Nomen">Nomen</option>
-                        <option value="Verb">Verb</option>
-                        <option value="Adjektiv">Adjektiv</option>
-                        <option value="Adverb">Adverb</option>
-                        <option value="Pronomen">Pronomen</option>
-                        <option value="Personalpronomen">Personalpronomen</option>
-                        <option value="Relativpronomen">Relativpronomen</option>
-                        <option value="Präposition">Präposition</option>
-                        <option value="Konjunktion">Konjunktion</option>
-                    </select>
-                `;
-                partsDiv.appendChild(partDiv);
-            });
-            
-            container.appendChild(partsDiv);
-        }
-        
-        // Funktion zum Überprüfen der Satzglieder
-        function checkSatzglieder() {
-            let allCorrect = true;
-            let correctCount = 0;
-            let totalCount = 0;
-            
-            satzgliederSaetze.forEach((satz, satzIndex) => {
-                satz.parts.forEach((part, partIndex) => {
-                    const select = document.getElementById(`${satz.id}-part${partIndex}`);
-                    totalCount++;
-                    
-                    if (select.value === part.solution) {
-                        select.classList.add('correct');
-                        select.classList.remove('incorrect');
-                        correctCount++;
-                    } else {
-                        select.classList.add('incorrect');
-                        select.classList.remove('correct');
-                        allCorrect = false;
-                    }
-                });
-            });
-            
-            const feedback = document.getElementById('satzglieder-feedback');
-            feedback.className = allCorrect ? 'feedback success show' : 'feedback error show';
-            feedback.innerHTML = allCorrect 
-                ? '🎉 Ausgezeichnet! Alle Satzglieder wurden korrekt bestimmt!' 
-                : `Du hast ${correctCount} von ${totalCount} Satzgliedern richtig bestimmt. Versuche es noch einmal!`;
-        }
-        
-        // Funktion zum Überprüfen der Wortarten
-        function checkWortarten() {
-            let allCorrect = true;
-            let correctCount = 0;
-            
-            wortartenSatz.words.forEach((word, index) => {
-                const select = document.getElementById(`${wortartenSatz.id}-wort${index}`);
-                
-                if (select.value === word.solution) {
-                    select.classList.add('correct');
-                    select.classList.remove('incorrect');
-                    correctCount++;
+        // JavaScript für die Akkordeon-Funktionalität
+        const accordions = document.getElementsByClassName("accordion");
+
+        for (let i = 0; i < accordions.length; i++) {
+            accordions[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
                 } else {
-                    select.classList.add('incorrect');
-                    select.classList.remove('correct');
-                    allCorrect = false;
+                    panel.style.maxHeight = panel.scrollHeight + "px";
                 }
             });
-            
-            const feedback = document.getElementById('wortarten-feedback');
-            feedback.className = allCorrect ? 'feedback success show' : 'feedback error show';
-            feedback.innerHTML = allCorrect 
-                ? '🎉 Perfekt! Alle Wortarten wurden korrekt zugeordnet!' 
-                : `Du hast ${correctCount} von ${wortartenSatz.words.length} Wortarten richtig bestimmt. Versuche es noch einmal!`;
         }
-        
-        // Initialisierung beim Laden der Seite
-        document.addEventListener('DOMContentLoaded', function() {
-            createFlashcards(wortartenData, 'wortarten-flashcards');
-            createFlashcards(satzgliederData, 'satzglieder-flashcards');
-            createSatzgliederExercise();
-            createWortartenExercise();
-        });
     </script>
+
 </body>
 </html>
