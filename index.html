@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithm Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-weight: 300;
+            font-size: 2.5rem;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        input, select, button {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .visualization {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            min-height: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 350px;
+            gap: 2px;
+            margin-top: 20px;
+        }
+
+        .bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 8px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .bar.comparing {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            transform: scale(1.1);
+        }
+
+        .bar.swapping {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            transform: scale(1.2);
+        }
+
+        .bar.sorted {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal h2 {
+            color: #e53e3e;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .modal p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #4a5568;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #e53e3e 0%, #fd5e53 100%);
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .bars-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sorting Algorithm Visualizer</h1>
+        
+        <div class="controls">
+            <div class="input-group">
+                <label for="numberInput">Add Number:</label>
+                <input type="number" id="numberInput" placeholder="Enter a number">
+                <button onclick="addNumber()">Add</button>
+            </div>
+            
+            <div class="input-group">
+                <label for="randomCount">Random Items Count:</label>
+                <input type="number" id="randomCount" placeholder="Count" min="1" max="50" value="10">
+                <button onclick="generateRandom()">Generate Random</button>
+            </div>
+            
+            <div class="input-group">
+                <label for="algorithmSelect">Sort Algorithm:</label>
+                <select id="algorithmSelect">
+                    <option value="quicksort">Quicksort</option>
+                    <option value="bubblesort">Bubble Sort</option>
+                    <option value="stalinsort">Stalin Sort</option>
+                </select>
+                <button onclick="startSort()">Sort</button>
+            </div>
+            
+            <div class="input-group">
+                <label>Actions:</label>
+                <button onclick="clearAll()">Clear All</button>
+                <button onclick="stopSort()" id="stopBtn" disabled>Stop Sort</button>
+            </div>
+        </div>
+
+        <div class="visualization">
+            <div class="bars-container" id="barsContainer">
+                <p style="margin: auto; color: #718096; font-size: 1.2rem;">Add numbers to visualize sorting</p>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready to sort</div>
+    </div>
+
+    <!-- Stalin Sort Warning Modal -->
+    <div id="stalinModal" class="modal">
+        <div class="modal-content">
+            <h2>⚠️ WARNING ⚠️</h2>
+            <p><strong>Stalin Sort Warning:</strong></p>
+            <p>This sorting algorithm may cause <strong>DATA CORRUPTION</strong>. Elements that are out of order will be permanently removed from your dataset.</p>
+            <p>Stalin Sort "sorts" by eliminating non-conforming elements rather than rearranging them.</p>
+            <p>Are you sure you want to proceed?</p>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn-confirm" onclick="confirmStalinSort()">I Understand, Proceed</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let numbers = [];
+        let isRunning = false;
+        let animationSpeed = 500;
+
+        function addNumber() {
+            const input = document.getElementById('numberInput');
+            const value = parseInt(input.value);
+            
+            if (!isNaN(value)) {
+                numbers.push(value);
+                input.value = '';
+                renderBars();
+                updateStatus(`Added ${value}. Total items: ${numbers.length}`);
+            }
+        }
+
+        function generateRandom() {
+            if (isRunning) return;
+            
+            const count = parseInt(document.getElementById('randomCount').value) || 10;
+            numbers = [];
+            
+            for (let i = 0; i < Math.min(count, 50); i++) {
+                numbers.push(Math.floor(Math.random() * 100) + 1);
+            }
+            
+            renderBars();
+            updateStatus(`Generated ${numbers.length} random numbers`);
+        }
+
+        function renderBars() {
+            const container = document.getElementById('barsContainer');
+            container.innerHTML = '';
+            
+            if (numbers.length === 0) {
+                container.innerHTML = '<p style="margin: auto; color: #718096; font-size: 1.2rem;">Add numbers to visualize sorting</p>';
+                return;
+            }
+
+            const maxValue = Math.max(...numbers);
+            const containerWidth = container.clientWidth;
+            const barWidth = Math.max(8, (containerWidth - numbers.length * 2) / numbers.length);
+
+            numbers.forEach((num, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.id = `bar-${index}`;
+                bar.style.height = `${(num / maxValue) * 300}px`;
+                bar.style.width = `${barWidth}px`;
+                bar.textContent = num;
+                container.appendChild(bar);
+            });
+        }
+
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function clearAll() {
+            if (isRunning) return;
+            numbers = [];
+            renderBars();
+            updateStatus('All items cleared');
+        }
+
+        function startSort() {
+            if (isRunning || numbers.length === 0) return;
+            
+            const algorithm = document.getElementById('algorithmSelect').value;
+            
+            if (algorithm === 'stalinsort') {
+                document.getElementById('stalinModal').style.display = 'block';
+                return;
+            }
+            
+            executeSort(algorithm);
+        }
+
+        function closeModal() {
+            document.getElementById('stalinModal').style.display = 'none';
+        }
+
+        function confirmStalinSort() {
+            closeModal();
+            executeSort('stalinsort');
+        }
+
+        function executeSort(algorithm) {
+            isRunning = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            switch(algorithm) {
+                case 'quicksort':
+                    quickSort(0, numbers.length - 1);
+                    break;
+                case 'bubblesort':
+                    bubbleSort();
+                    break;
+                case 'stalinsort':
+                    stalinSort();
+                    break;
+            }
+        }
+
+        function stopSort() {
+            isRunning = false;
+            document.getElementById('stopBtn').disabled = true;
+            clearAnimations();
+            updateStatus('Sorting stopped');
+        }
+
+        function clearAnimations() {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                bar.classList.remove('comparing', 'swapping', 'sorted');
+            });
+        }
+
+        async function bubbleSort() {
+            updateStatus('Bubble Sort in progress...');
+            
+            for (let i = 0; i < numbers.length - 1 && isRunning; i++) {
+                for (let j = 0; j < numbers.length - i - 1 && isRunning; j++) {
+                    await highlightBars([j, j + 1], 'comparing');
+                    
+                    if (numbers[j] > numbers[j + 1]) {
+                        await highlightBars([j, j + 1], 'swapping');
+                        [numbers[j], numbers[j + 1]] = [numbers[j + 1], numbers[j]];
+                        renderBars();
+                        await sleep(animationSpeed);
+                    }
+                    
+                    clearAnimations();
+                }
+                
+                const bar = document.getElementById(`bar-${numbers.length - i - 1}`);
+                if (bar) bar.classList.add('sorted');
+            }
+            
+            if (isRunning) {
+                markAllSorted();
+                updateStatus('Bubble Sort completed!');
+            }
+            
+            isRunning = false;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        async function quickSort(low, high) {
+            if (low < high && isRunning) {
+                updateStatus(`Quick Sort in progress... (sorting range ${low}-${high})`);
+                
+                const pi = await partition(low, high);
+                
+                if (isRunning) {
+                    await quickSort(low, pi - 1);
+                    await quickSort(pi + 1, high);
+                }
+            }
+            
+            if (low === 0 && high === numbers.length - 1 && isRunning) {
+                markAllSorted();
+                updateStatus('Quick Sort completed!');
+                isRunning = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        async function partition(low, high) {
+            const pivot = numbers[high];
+            let i = low - 1;
+            
+            for (let j = low; j < high && isRunning; j++) {
+                await highlightBars([j, high], 'comparing');
+                
+                if (numbers[j] < pivot) {
+                    i++;
+                    await highlightBars([i, j], 'swapping');
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                    renderBars();
+                    await sleep(animationSpeed);
+                }
+                
+                clearAnimations();
+            }
+            
+            if (isRunning) {
+                await highlightBars([i + 1, high], 'swapping');
+                [numbers[i + 1], numbers[high]] = [numbers[high], numbers[i + 1]];
+                renderBars();
+                await sleep(animationSpeed);
+                clearAnimations();
+            }
+            
+            return i + 1;
+        }
+
+        async function stalinSort() {
+            updateStatus('Stalin Sort in progress... (removing non-conforming elements)');
+            
+            let i = 0;
+            while (i < numbers.length - 1 && isRunning) {
+                await highlightBars([i, i + 1], 'comparing');
+                
+                if (numbers[i] > numbers[i + 1]) {
+                    await highlightBars([i + 1], 'swapping');
+                    numbers.splice(i + 1, 1);
+                    renderBars();
+                    await sleep(animationSpeed * 1.5);
+                    updateStatus(`Stalin Sort: Eliminated non-conforming element. ${numbers.length} elements remaining.`);
+                } else {
+                    i++;
+                }
+                
+                clearAnimations();
+            }
+            
+            if (isRunning) {
+                markAllSorted();
+                updateStatus(`Stalin Sort completed! Data "sorted" by elimination. ${numbers.length} elements survived.`);
+            }
+            
+            isRunning = false;
+            document.getElementById('stopBtn').disabled = true;
+        }
+
+        async function highlightBars(indices, className) {
+            indices.forEach(index => {
+                const bar = document.getElementById(`bar-${index}`);
+                if (bar) bar.classList.add(className);
+            });
+            await sleep(animationSpeed / 2);
+        }
+
+        function markAllSorted() {
+            const bars = document.querySelectorAll('.bar');
+            bars.forEach(bar => {
+                bar.classList.remove('comparing', 'swapping');
+                bar.classList.add('sorted');
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Event listeners
+        document.getElementById('numberInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addNumber();
+            }
+        });
+
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('stalinModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Initial render
+        renderBars();
+    </script>
+</body>
+</html>
